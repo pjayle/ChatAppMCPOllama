@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@ViewData["Title"] - Ollama MCP Chat</title>
+<style>
+ body{font-family:system-ui,sans-serif;max-width:760px;margin:20px auto;padding:0 12px}
+ header{display:flex;justify-content:space-between;align-items:center}
+</style>
+</head><body>
+<header><h2>Product Master Chat</h2><small>Ollama + MCP · ASP.NET Core MVC</small></header>
+@RenderBody()
+@await RenderSectionAsync("Scripts", required: false)
+</body></html>

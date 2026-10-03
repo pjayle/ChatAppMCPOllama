@@ -1,0 +1,52 @@
+@{ ViewData["Title"] = "Chat"; }
+<style>
+ #log{border:1px solid #ccc;border-radius:8px;height:60vh;overflow:auto;padding:10px;background:#fafafa}
+ .m{margin:8px 0;padding:8px 12px;border-radius:10px;white-space:pre-wrap;max-width:85%}
+ .u{background:#1a73e8;color:#fff;margin-left:auto}.b{background:#e8eaed}
+ .t{font-size:12px;color:#666;margin-top:4px}
+ form{display:flex;gap:8px;margin-top:10px}input{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
+ button{padding:10px 16px;border:0;border-radius:8px;background:#1a73e8;color:#fff;cursor:pointer}
+ button.alt{background:#5f6368}
+</style>
+
+<div id="log"></div>
+<form id="f">
+  <input id="q" placeholder="e.g. Which products expire in 7 days?" autocomplete="off">
+  <button>Send</button>
+  <button type="button" id="reset" class="alt">New chat</button>
+</form>
+
+@section Scripts {
+<script>
+let sid = crypto.randomUUID();
+const log = document.getElementById('log');
+const sendUrl = '@Url.Action("Send", "Chat")';
+const resetUrl = '@Url.Action("Reset", "Chat")';
+
+function add(text, cls, tools) {
+  const d = document.createElement('div'); d.className = 'm ' + cls; d.textContent = text;
+  if (tools && tools.length) {
+    const t = document.createElement('div'); t.className = 't';
+    t.textContent = 'tools: ' + tools.join(', '); d.appendChild(t);
+  }
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+const post = (url, body) => fetch(url, { method: 'POST',
+  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+document.getElementById('f').onsubmit = async e => {
+  e.preventDefault();
+  const q = document.getElementById('q'), msg = q.value.trim(); if (!msg) return;
+  q.value = ''; add(msg, 'u'); const w = add('thinking...', 'b');
+  try {
+    const r = await post(sendUrl, { sessionId: sid, message: msg });
+    const j = await r.json(); w.remove();
+    add(j.reply, 'b', j.toolsUsed);
+  } catch (err) { w.textContent = 'Error: ' + err; }
+};
+document.getElementById('reset').onclick = async () => {
+  await post(resetUrl, { sessionId: sid, message: '' });
+  sid = crypto.randomUUID(); log.innerHTML = '';
+};
+</script>
+}
